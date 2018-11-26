@@ -19,7 +19,11 @@
 
 #define VERBOSE_OUT_STREAM stderr		// "stderr" or "stdout"
 
-typedef struct { int bus; char *name; } shortcut_struct;
+#define MAX_SHORTCUT_LENGTH 100			// Maximum length of chars for shortcut names
+
+
+
+typedef struct { int bus; char name[MAX_SHORTCUT_LENGTH]; } shortcut_struct;
 
 
 // convenience shortcuts, list aliases here:
@@ -41,6 +45,10 @@ shortcut_struct static_shortcuts[] = {
 };
 
 
+shortcut_struct *dynamic_shortcuts = NULL;
+int dynamic_shortcuts_size = 0;
+
+
 #define bool int
 #define true 1
 #define false 0
@@ -55,9 +63,6 @@ bool quiet = false;
 #define ITALIC printf("\e[3m");
 #define RESETTEXT printf("\e[0m");
 
-#if CASE_SENSITIVE==1
-#define MAX_SHORTCUT_LENGTH 100
-#endif
 
 void usage(char *progname) {
 
@@ -153,6 +158,36 @@ if (i != -1) {
 	printf("\n");
 	exit(127);
 }
+
+int get_dynamic_shortcuts_size() {
+	return dynamic_shortcuts_size;
+}
+
+void init_dynamic_shortcuts() {
+	dynamic_shortcuts = (shortcut_struct*) malloc(sizeof(shortcut_struct));
+	dynamic_shortcuts_size = 1;
+}
+
+void grow_dynamic_shortcuts() {
+	shortcut_struct *_dynamic_shortcuts = (shortcut_struct*) malloc(sizeof(shortcut_struct)*(dynamic_shortcuts_size+1));
+	for (int i=0; i < dynamic_shortcuts_size; ++i) {
+		(_dynamic_shortcuts+i)->bus = (dynamic_shortcuts+i)->bus;
+		strcpy(&(_dynamic_shortcuts+i)->name, (dynamic_shortcuts+i)->name);
+	}
+	dynamic_shortcuts = _dynamic_shortcuts;
+	dynamic_shortcuts_size++;
+}
+
+void insert_in_dynamic_shortcuts(int _bus, char *_name) {
+	if (dynamic_shortcuts_size < 1) {
+		init_dynamic_shortcuts();
+	} else {
+		grow_dynamic_shortcuts();
+	}
+	(dynamic_shortcuts+(dynamic_shortcuts_size-1))->bus = _bus;
+	strcpy(&(dynamic_shortcuts+(dynamic_shortcuts_size-1))->name, _name);
+}
+
 
 #if CASE_SENSITIVE==1
 char *to_lowercase(char *str) {
@@ -316,29 +351,8 @@ void read_external_shortcuts(char *filename) {
 			if (verbose) {
 				fprintf(VERBOSE_OUT_STREAM, "Found entry for bus %d with name \"%s\"\n", tempbus, tempname);
 			}
-			// first check whether we need to overwrite an existing entry
-			//FIXME: rewrite insertion of user-shortcut in different array
-			/*bool existing = false;
-			int size = (sizeof(shortcuts)/8);
-			for (int i = 0; i < size; i++) {
-				if (shortcuts[i].bus == tempbus) {
-					printf("Bus: %d is equal to %d\n", shortcuts[i].bus, tempbus);
-					existing = true;
-					shortcuts[i].name = tempname;
-					break;
-				}
-			}
-			if (existing == false) {
-				shortcuts = realloc(shortcuts, sizeof(shortcut_t) * (size+1));
-				for (int i = 0; i < size; i++) {
-					_shortcuts[i].bus = shortcuts[i].bus;
-					_shortcuts[i].name = shortcuts[i].name;
-				}
-				_shortcuts[size].bus = tempbus;
-				_shortcuts[size].name = tempname;
-				memcpy(&shortcuts,&_shortcuts,sizeof(_shortcuts));
-
-			}*/
+			// insert entry into array of dynamic shortcuts
+			insert_in_dynamic_shortcuts(tempbus, tempname);
 		}	
 	}
 
@@ -351,17 +365,24 @@ int get_shortcut(char *shortcutname) {
 
 #if IGNORE_EXTERNAL_SHORTCUTS_FILE==0
 	char *externalfile = getenv("IICSELECT_CONFIG");
-	if (externalfile == NULL || strcmp(externalfile,"")==0) {
-		externalfile="/dev/null";
+	if (externalfile != NULL && strcmp(externalfile,"")!=0) {
+		read_external_shortcuts(externalfile);
 	}
-	printf("File is %s\n", externalfile);
-	read_external_shortcuts(externalfile);
+
+	for (int i = 0; i < get_dynamic_shortcuts_size(); ++i) {
+#if CASE_SENSITIVE==1
+		if (strcmp((dynamic_shortcuts+i)->name, shortcutname) == 0) {
+#else
+		if (strcmp(to_lowercase((dynamic_shortcuts+i)->name), to_lowercase(shortcutname)) == 0) {
+#endif
+			return (dynamic_shortcuts+i)->bus;
+		}
+	}
+
 #endif
 
 	int size = (sizeof(static_shortcuts)/8);
 	for (int i = 0; i < size; i++) {
-	//FIXME: Remove this line...
-		printf("Shortcut %d: Bus %d, Name %s\n", i, static_shortcuts[i].bus, static_shortcuts[i].name); 
 #if CASE_SENSITIVE==1
 		if (strcmp(static_shortcuts[i].name, shortcutname) == 0) {
 #else
@@ -466,10 +487,6 @@ int main(int argc, char *argv[]) {
 	}	
 
 	snprintf(filename, 19, "/dev/i2c-%d", bus_no);
-
-	//FIXME: REMOVE!
-	printf("Disabled!\n");
-	exit(0);
 
 	file = open(filename, O_RDONLY);
 	if (verbose) { fprintf(VERBOSE_OUT_STREAM, "Opening device \"%s\"\n", filename); }
