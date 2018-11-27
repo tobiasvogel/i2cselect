@@ -1,5 +1,5 @@
 # i2cselect
-A quick selector utility for selecting a I2C-device bus on Raspberry Pi when using a TCA9548 Multiplexer
+A quick selector utility for selecting a I2C-device bus on a Raspberry Pi when using a TCA9548 Multiplexer
 
 ***
 
@@ -15,7 +15,7 @@ The mentioned advantage however, comes with another drawback itself, namely that
 
 You could switch lines by simply triggering a random read or write operation to another line and thereby causing the Kernel to switch lines, what doubtlessly works but may become sluggish and inflexible depending on your specific requirements.
 
-The i2cselect utility works around this problem by simply opening the requested line for you and reading a single byte from the opened line<sup><b>2</b></sup>. More importantly, though, it lets you assign aliases for the lines either directly hardcoded at compile-time, from a config-file at runtime or even use both variants at the same time. This allows for a quick access by a simple call line `$> i2cselect ir-sensor` as an example to have the corresponding line (and its devices) appear on i2c-1.
+The i2cselect utility works around this problem by simply opening the requested line for you and reading a single byte from the opened line<sup><b>2</b></sup>. More importantly, though, it lets you assign aliases for the lines either directly hardcoded at compile-time, from a config-file at runtime or even use both variants at the same time. This allows for a quick access by a simple call like `$> i2cselect ir-sensor` as an example to have the corresponding line (and its devices) appear on i2c-1.
 
 The utility is written to be easy to integrate in scripts with different options available to control its behaviour and verbosity.
 <br>

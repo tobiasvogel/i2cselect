@@ -1,0 +1,79 @@
+.TH I2CSELECT 8
+.SH NAME
+i2cselect \- utility for selecting a I2C-device bus on Raspberry Pi when using a TCA9548 Multiplexer
+.SH SYNOPSIS
+.B i2cselect
+[\fB\-q\fR|\fB\-v\fR]
+[\fB\-\-quiet\fR|\fB\-\-verbose\fR]
+[\fB\-h\fR|\fB\-\-help\fR]
+\fIBUS\fR|\fISHORTCUT\fR
+.SH DESCRIPTION
+.B i2cselect
+If you ever happened to use the Texas Instruments TCA9548 I²C-Multiplexer in combination with a Raspberry Pi, you might find it handy to simply activate the "i2c-mux"-Device-Tree Overlay that came right with the Raspbian Linux Distribution. And this DTO indeed is very useful and convenient!
+
+The DTO basically adds the 8 additional I²C-Lines to your Device Tree as /dev/i2c-3 through /dev/i2c-10, while the one true I²C-Device of the Raspberry Pi remains on /dev/i2c-1. Apart from the TCA9548 itself, devices connected to the I²C-Line of the TCA9548-Multiplexer which was accessed the last can also be seen and interacted with on the i2c-1 device, too.
+
+While some people consider the continuing existence of the i2c-1 bus under /dev as a shortcoming of this particular DTO, in some cases this might be a significant advantage1 - especially when dealing with some 3rd-Party-libraries trying to access a device only on i2c-1 whatsoever.
+
+The mentioned advantage however, comes with another drawback itself, namely that the Kernel inevitably claims ownership of the TCA9548 (since it manages the device for you...) and therefore won't let you directly write to the TCA9548s registers in order to switch between the different lines.
+
+You could switch lines by simply triggering a random read or write operation to another line and thereby causing the Kernel to switch lines, what doubtlessly works but may become sluggish and inflexible depending on your specific requirements.
+
+The i2cselect utility works around this problem by simply opening the requested line for you and reading a single byte from the opened line2. More importantly, though, it lets you assign aliases for the lines either directly hardcoded at compile-time, from a config-file at runtime or even use both variants at the same time. This allows for a quick access by a simple call like i2cselect ir-sensor as an example to have the corresponding line (and its devices) appear on i2c-1.
+.SH OPTIONS
+.TP
+.BR \-q ", " \-\-quiet
+Neither output any messages nor any errors. The exit status is solely indicated by the return value.
+.TP
+.BR \-v ", " \-\-verbose
+Outputs informational messages. Useful for debugging.
+.TP
+.BR \-h ", " \-\-help
+Print basic usage information and help text.
+.SH ARGUMENTS
+.TP
+.IR BUS
+Number of I2C-Bus to select. Corresponds to numbers of /dev/i2c-*. The first line of the Multiplexer usually is enumerated as no 3.
+.TP
+.IR SHORTCUT
+Select I2C-Bus by an alias name ("shortcut"). Shortcuts can either be directly hardcoded into the executable at compile time or specified in a seperate config file. See the "i2cselect-example.conf"-file in the documentation directory of this program. The config file to be used is specified at runtime and passed to the executable as environment variable "IICSELECT_CONFIG". Reading from config files at runtime can be disabled globally at compile time using the according C macro. The syntax of config files is very simple:
+.RS
+.IP - 3
+Lines starting with a Hash- (\fB#\fR) or Semicolon- (\fB;\fR) character are considered Comments and are ignored
+.IP - 3
+Only one shortcut is allowed per line
+.IP - 3
+Each shortcut must be enclosed in Braces (\fB{\fR and \fB}\fR)
+.IP - 3
+Each shortcut must be specified in the form of an integer representing the I2C-Bus followed by a comma and a designator string encapsulated in double Quotes (\fB"\fR).
+.IP - 3
+The integer may \fIoptionally\fR be preceeded by BUS= , the designator string by NAME=
+.IP - 3
+No blank characters ( Whitespace, Tab, Horizontal Feed, etc.) are allowed
+.br
+.IP Example:
+.br
+.in +6
+# This is a comment
+.br
+{BUS=3,"first-shortcut"}
+.br
+{4,"anotherone"}
+.RE
+.SH "SEE ALSO"
+.LP
+Github page of i2cselect
+.IP
+https://github.com/tobiasvogel/i2cselect
+.SH AUTHOR
+Tobias X. Vogel
+.SH "REPORTING BUGS"
+Please report directly via Github
+.SH COPYRIGHT
+Copyright (c) 2018 Tobias X. Vogel
+.br
+This is free software; see the source for copying conditions. There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+.SH TRADEMARKS AND ACKNOWLEDGEMENTS
+Raspberry Pi is a trademark of the Raspberry Pi Foundation. See
+http://raspberrypi.org/ for full details.

@@ -4,7 +4,7 @@
 AC_PREREQ([2.69])
 AC_INIT(i2cselect, 0.1, https://github.com/tobiasvogel/i2cselect)
 AC_CONFIG_SRCDIR([src/i2cselect.c])
-AC_CONFIG_HEADERS([config.h])
+AM_INIT_AUTOMAKE
 
 # Checks for programs.
 AC_PROG_CC
@@ -23,4 +23,4 @@ AC_TYPE_SSIZE_T
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([strchr strrchr strtol])
 
-AC_OUTPUT
+AC_OUTPUT(Makefile src/Makefile doc/Makefile man/Makefile)
