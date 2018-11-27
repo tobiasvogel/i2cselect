@@ -1,0 +1,5 @@
+i2cselect (0.1-1) unstable; urgency=medium
+
+  * Initial release
+
+ -- Tobias X. Vogel <tobias.vogel@linux.com>  Tue, 27 Nov 2018 14:29:24 +0100

@@ -449,7 +449,9 @@ int main(int argc, char *argv[]) {
 	int file;
 	char filename[20];
 	int bus_no;
+#if SKIP_IOCTL_FUNC_CHECK==0
 	unsigned long funcs;
+#endif
 
 	if (argc != 2 && argc != 3) {
 		usage(argv[0]);

@@ -1,0 +1,14 @@
+Source: i2cselect
+Section: utils
+Priority: optional
+Maintainer: Tobias X. Vogel <tobias.vogel@linux.com>
+Build-Depends: debhelper (>= 9), dh-autoreconf
+Standards-Version: 3.9.8
+Homepage: https://github.com/tobiasvogel/i2cselect
+Vcs-Git: https://github.com/tobiasvogel/i2cselect.git
+
+Package: i2cselect
+Architecture: armhf
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: utility for I2C bus-selection for Raspberry Pi + TCA9548 Mux
+ i2cselect helps switching between active i2c-busses on a Raspberry Pi when using a TCA9548 I2C-Multiplexer in conjunction with the 'i2c-mux' dt-overlay.
