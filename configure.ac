@@ -23,4 +23,4 @@ AC_TYPE_SSIZE_T
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([strchr strrchr strtol])
 
-AC_OUTPUT(Makefile src/Makefile doc/Makefile man/Makefile)
+AC_OUTPUT(Makefile src/Makefile doc/Makefile man/Makefile examples/Makefile)
