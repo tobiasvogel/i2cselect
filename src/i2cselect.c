@@ -10,28 +10,8 @@
 #include <string.h>
 #include "pidfile.c"
 
+#include "../config.h"
 
-#define CASE_SENSITIVE 1	  		// 1 = True, 0 = False (Case insensitive)
-
-#define USE_TEXT_FORMATING 0	  		// 1 = True, 0 = False (Only standard output)
-
-#define SKIP_IOCTL_FUNC_CHECK 1	 		// 1 = True, 0 = False (Do some basic checks)
-
-#define IGNORE_COMPLEX_SHORTCUTS 0		// 1 = True, 0 = False (Include complex shortcuts)
-
-#define IGNORE_EXTERNAL_SHORTCUTS_FILE 0	// 1 = True, 0 == False (Do read external files if specified)
-
-#define IGNORE_EXTERNAL_COMPLEX_SHORTCUTS 0	// 1 = True, 0 == False (Include complex shortcuts from external file)
-
-#define VERBOSE_OUT_STREAM stderr		// "stderr" or "stdout"
-
-#define MAX_SHORTCUT_LENGTH 100			// Maximum length of chars for shortcut names
-
-#define MAX_SHELL_COMMAND_LENGHT 999		// Maximum length of chars for variable to store 'exec_before' and 'exec_after' commands
-
-#define REDIRECT_EXTERNAL_COMMANDS_STDERR 1	// 1 = True, 0 = False (Append '2>&1' to external commands, outputted only if run verbosely!)
-
-#define WAITTIME_ON_PIDLOCK 3			// Retry-Time in Seconds in case another Instance is already running. 0 = Exit with Error immediately
 
 //FIXME: Better way to distinguish if macro was set
 //#if IGNORE_COMPLEX_SHORTCUTS==0
@@ -60,26 +40,14 @@ typedef struct {
 //typedef struct { int bus; char name[MAX_SHORTCUT_LENGTH]; } shortcut_struct;
 //#endif
 
+#ifdef HAVE_USER_SHORTCUTS_FILE
+// File for hardcoded Shortcuts
+#include "user_shortcuts.h"
+#endif
 
-// convenience shortcuts, list aliases here:
-// shortcuts can also be placed in file
-// (conflicting shortcuts from file overwrite
-//  shortcuts specified here).
-// the file needs to be referenced as environment-
-// variable called IICSELECT_CONFIG at runtime
-// reading shortcuts at runtime from a file can
-// be globally disabled by setting the macro
-// IGNORE_EXTERNAL_SHORTCUTS_FILE to 1
-
-shortcut_struct static_shortcuts[] = {
-
-  { .bus = 3, .name = "display" },
-  { .bus = 4, .name = "camera" },
-  { .bus = 5, .name = "ir-sensor" },
-  { .bus = 4, .name = "camera-1", .exec_after = "/usr/local/bin/cameraselect 1" }
-
-};
-
+#ifndef USER_SHORTCUTS_H
+shortcut_struct static_shortcuts[] = { {} };
+#endif
 
 #if IGNORE_COMPLEX_SHORTCUTS==0
 enum options_e { HAS_TYPE, HAS_MODE, HAS_EXPECT, HAS_DEVICE_ADDR, HAS_REGISTER_ADDR, HAS_EXEC_BEFORE, HAS_EXEC_AFTER };
@@ -92,8 +60,6 @@ int dynamic_shortcuts_size = 0;
 #define bool int
 #define true 1
 #define false 0
-
-#define PIDFILE "/var/run/i2cselect.pid"
 
 bool verbose = false;
 bool quiet = false;
