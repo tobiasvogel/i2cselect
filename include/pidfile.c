@@ -19,10 +19,11 @@
  *
  * A copy of the GPL can be found in the file "COPYING" in this distribution.
 */
-#include "config.h"
 
 
-#include "rsyslog.h"
+//   Version based on Original File from Martin Schulze   //
+//        Modified for "i2cselect" by Tobias Vogel        //
+
 
 /*
  * Sat Aug 19 13:24:33 MET DST 1995: Martin Schulze
@@ -31,16 +32,10 @@
 
 #include <stdio.h>
 #include <unistd.h>
-#include <sys/stat.h>
-#include <sys/file.h>
-#include <string.h>
 #include <errno.h>
 #include <signal.h>
-#ifdef __sun
 #include <fcntl.h>
-#endif
 
-#include "srUtils.h"
 
 /* read_pid
  *
@@ -99,7 +94,7 @@ int write_pid (char *pidfile)
 
   if ( ((fd = open(pidfile, O_RDWR|O_CREAT, 0644)) == -1)
        || ((f = fdopen(fd, "r+")) == NULL) ) {
-      fprintf(stderr, "Can't open or create %s.\n", pidfile);
+//      fprintf(stderr, "Can't open or create %s.\n", pidfile);
       return 0;
   }
 
@@ -115,16 +110,15 @@ int write_pid (char *pidfile)
   if (flock(fd, LOCK_EX|LOCK_NB) == -1) {
       fscanf(f, "%d", &pid);
       fclose(f);
-      printf("Can't lock, lock is held by pid %d.\n", pid);
+//    printf("Can't lock, lock is held by pid %d.\n", pid);
       return 0;
   }
 #endif
 
   pid = getpid();
   if (!fprintf(f,"%d\n", pid)) {
-      char errStr[1024];
-      rs_strerror_r(errno, errStr, sizeof(errStr));
-      printf("Can't write pid , %s.\n", errStr);
+//      char errStr[1024];
+//      printf("Can't write pid , %s.\n", errStr);
       close(fd);
       return 0;
   }
@@ -132,9 +126,8 @@ int write_pid (char *pidfile)
 
 #if HAVE_FLOCK
   if (flock(fd, LOCK_UN) == -1) {
-      char errStr[1024];
-      rs_strerror_r(errno, errStr, sizeof(errStr));
-      printf("Can't unlock pidfile %s, %s.\n", pidfile, errStr);
+//      char errStr[1024];
+//      printf("Can't unlock pidfile %s, %s.\n", pidfile, errStr);
       close(fd);
       return 0;
   }
