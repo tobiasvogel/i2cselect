@@ -1,4 +1,5 @@
 #include <linux/i2c-dev.h>
+#include <linux/limits.h>
 #include <sys/ioctl.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -1030,9 +1031,9 @@ int validate_input(char *progname, char *argument) {
 
 void execute_command(char *cmd) {
   FILE *execFp;
-  char output[MAX_SHELL_COMMAND_LENGHT];
+  char output[ARG_MAX];
 
-  char *execCmd;
+  char execCmd[MAX_SHELL_COMMAND_LENGHT+6];
   strcpy(execCmd, cmd);
 
 #if REDIRECT_EXTERNAL_COMMANDS_STDERR==1

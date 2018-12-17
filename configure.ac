@@ -8,11 +8,12 @@ AM_INIT_AUTOMAKE
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_INSTALL
 
 # Checks for libraries.
 
 # Checks for header files.
-AC_CHECK_HEADERS([fcntl.h stdlib.h string.h sys/ioctl.h unistd.h])
+AC_CHECK_HEADERS([fcntl.h stdint.h stdlib.h string.h sys/ioctl.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
@@ -21,7 +22,7 @@ AC_TYPE_SSIZE_T
 
 # Checks for library functions.
 AC_FUNC_MALLOC
-AC_CHECK_FUNCS([strchr strrchr strtol])
+AC_CHECK_FUNCS([strchr strrchr strdup strtol])
 
 # Definition Macros used in the Utility Code itself
 AC_DEFINE([CASE_SENSITIVE], [1], [Decides when calling the utility using predefined Shortcut-Names, whether the Shortcut-Names should be treated Case Sensitive or not. 1 = True (Case Sensitive), 0 = False (Case Insensitive)])
